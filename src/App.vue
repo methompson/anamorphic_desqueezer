@@ -1,11 +1,21 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { RouterView } from 'vue-router';
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <VApp class="appContainer">
+    <VMain class="mainContainer">
+      <RouterView />
+    </VMain>
+  </VApp>
 </template>
 
-<style scoped></style>
+<style scoped>
+.appContainer {
+  background-color: blue;
+}
+
+.mainContainer {
+  background-color: green;
+}
+</style>
