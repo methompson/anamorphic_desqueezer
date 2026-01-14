@@ -12,6 +12,7 @@
           label="Load Image"
           variant="outlined"
           density="compact"
+          hide-details
         />
       </VCol>
 
@@ -50,42 +51,29 @@
 
       <!-- Color Picker -->
       <VCol :cols="columns" :sm="sm">
-        <VMenu
-          v-model="colorMenu"
-          :close-on-content-click="false"
-          location="end"
-        >
-          <template #activator="{ props }">
-            <VBtn v-bind="props" variant="outlined">
-              Select Background Color
-            </VBtn>
-          </template>
-
-          <VCard>
-            <VCardText>
-              <VColorPicker
-                v-model="color"
-                label="Background Color"
-                mode="hexa"
-                flat
-                variant="outlined"
-                density="compact"
-              />
-            </VCardText>
-
-            <VCardActions>
-              <VBtn variant="text" text="OK" @click="colorMenu = false" />
-            </VCardActions>
-          </VCard>
-        </VMenu>
+        <VRow>
+          <VCol class="d-flex align-center"> Background Color </VCol>
+          <VCol>
+            <input type="color" id="bgColor" v-model="color" />
+          </VCol>
+        </VRow>
       </VCol>
 
       <!-- Export Image Button -->
       <VCol :cols="columns" :sm="sm" class="buttonContainer">
-        <VBtn @click="openExportDialog" variant="outlined"> Export Image </VBtn>
+        <VBtn
+          @click="openExportDialog"
+          :disabled="savingImage"
+          variant="outlined"
+        >
+          <template v-if="savingImage" v-slot:prepend>
+            <VProgressCircular indeterminate :size="20" />
+          </template>
+          Export Image
+        </VBtn>
 
         <VDialog v-model="exportDialog" v-if="exportDialog" max-width="500px">
-          <ImageExportModal @cancel="closeExportDialog" @export="saveImage" />
+          <ImageExportModal @cancel="closeExportDialog" @export="exportImage" />
         </VDialog>
       </VCol>
     </VRow>
@@ -93,7 +81,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, type Ref } from 'vue';
+import {
+  onBeforeMount,
+  ref,
+  toRefs,
+  watch,
+  type ModelRef,
+  type Ref,
+} from 'vue';
 
 import type { DesqueezeOptions } from '@/models/desqueeze_options';
 
@@ -104,8 +99,19 @@ import type { ExportOptions } from '@/models/export_options';
 const columns = 12;
 const sm = 6;
 
+const props = withDefaults(
+  defineProps<{
+    savingImage?: boolean;
+  }>(),
+  {
+    savingImage: false,
+  },
+);
+
+const { savingImage } = toRefs(props);
+
 const emit = defineEmits<{
-  (e: 'change', options: DesqueezeOptions): void;
+  (e: 'exportImage', options: ExportOptions): void;
 }>();
 
 const file: Ref<File | undefined> = ref();
@@ -116,22 +122,22 @@ watch(file, () => {
   });
 });
 
+const model: ModelRef<DesqueezeOptions | undefined> = defineModel();
+
 const desqueezeRatio: Ref<number> = ref(1);
 const lensDistortion: Ref<number> = ref(0);
 const zoom: Ref<number> = ref(1);
-const colorMenu: Ref<boolean> = ref(false);
-
 // Stick with yellow for now
 const color: Ref<string> = ref('#FF0');
 
-watch([file, desqueezeRatio, lensDistortion, zoom], () => {
-  emit('change', {
+watch([file, desqueezeRatio, lensDistortion, zoom, color], () => {
+  model.value = {
     file: file.value,
     desqueezeRatio: desqueezeRatio.value,
     lensDistortion: lensDistortion.value,
     zoom: zoom.value,
     backgroundColor: color.value,
-  });
+  };
 });
 
 const exportDialog = ref(false);
@@ -143,9 +149,24 @@ function closeExportDialog() {
   exportDialog.value = false;
 }
 
-function saveImage(options: ExportOptions) {
+function exportImage(options: ExportOptions) {
+  emit('exportImage', options);
   exportDialog.value = false;
 }
+
+function beforeMountHandler() {
+  const opt = model.value;
+
+  if (opt) {
+    desqueezeRatio.value = opt.desqueezeRatio;
+    lensDistortion.value = opt.lensDistortion;
+    zoom.value = opt.zoom;
+    color.value = opt.backgroundColor;
+    file.value = opt.file;
+  }
+}
+
+onBeforeMount(beforeMountHandler);
 </script>
 
 <style>

@@ -54,7 +54,7 @@ export class WebGLImageViewer {
   private gl: WebGLRenderingContext;
   private program: WebGLProgram | null = null;
   private texture: WebGLTexture | null = null;
-  private image: HTMLImageElement | null = null;
+  private _image: HTMLImageElement | null = null;
 
   private desqueeze = 1.0;
   private distortion = 0.0;
@@ -71,7 +71,12 @@ export class WebGLImageViewer {
 
     this.initWebGL();
     this.resizeCanvas();
+    this.setBackgroundColor('#ffff00');
     window.addEventListener('resize', () => this.resizeCanvas());
+  }
+
+  get image() {
+    return this._image;
   }
 
   private initWebGL() {
@@ -163,7 +168,7 @@ export class WebGLImageViewer {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        this.image = img;
+        this._image = img;
         this.uploadTexture(img);
         this.render();
       };
@@ -217,7 +222,7 @@ export class WebGLImageViewer {
   }
 
   render() {
-    if (!this.program || !this.image) return;
+    if (!this.program || !this._image) return;
 
     const gl = this.gl;
 
@@ -233,7 +238,7 @@ export class WebGLImageViewer {
 
     // Calculate scale to fit image in canvas without stretching
     const canvasAspect = this.canvas.width / this.canvas.height;
-    const imageAspect = this.image.width / this.image.height;
+    const imageAspect = this._image.width / this._image.height;
 
     let scaleX = 1.0;
     let scaleY = 1.0;
@@ -272,7 +277,7 @@ export class WebGLImageViewer {
     gl.uniform1f(distortionLocation, this.distortion);
     gl.uniform1f(zoomLocation, this.zoom);
     gl.uniform2f(resolutionLocation, this.canvas.width, this.canvas.height);
-    gl.uniform2f(imageSizeLocation, this.image.width, this.image.height);
+    gl.uniform2f(imageSizeLocation, this._image.width, this._image.height);
 
     // Draw
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -281,13 +286,13 @@ export class WebGLImageViewer {
   exportAsBMP(): Blob {
     const gl = this.gl;
 
-    if (!this.image) {
+    if (!this._image) {
       throw new Error('No image loaded');
     }
 
     // Calculate output dimensions at full resolution with desqueeze applied
-    const outputWidth = this.image.width;
-    const outputHeight = Math.round(this.image.height / this.desqueeze);
+    const outputWidth = this._image.width;
+    const outputHeight = Math.round(this._image.height / this.desqueeze);
 
     // Create offscreen framebuffer for full-resolution rendering
     const framebuffer = gl.createFramebuffer();
@@ -358,7 +363,7 @@ export class WebGLImageViewer {
     gl.uniform1f(distortionLocation, this.distortion);
     gl.uniform1f(zoomLocation, this.zoom);
     gl.uniform2f(resolutionLocation, outputWidth, outputHeight);
-    gl.uniform2f(imageSizeLocation, this.image.width, this.image.height);
+    gl.uniform2f(imageSizeLocation, this._image.width, this._image.height);
 
     // Draw to framebuffer
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
