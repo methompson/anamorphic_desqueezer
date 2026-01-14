@@ -1,11 +1,16 @@
 <template>
   <div class="homePageContainer">
-    <div class="topContainer">Top Section</div>
-    <div class="bottomContainer">Bottom Section</div>
+    <div class="topContainer"><TopSection /></div>
+    <div class="bottomContainer">
+      <BottomSection />
+    </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import TopSection from '@/views/components/home/top_section.vue';
+import BottomSection from '@/views/components/home/bottom_section.vue';
+</script>
 
 <style scoped>
 .homePageContainer {
@@ -24,5 +29,6 @@
   background-color: orange;
   height: 40%;
   width: 100%;
+  overflow: scroll;
 }
 </style>
