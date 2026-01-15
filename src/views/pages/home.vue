@@ -89,7 +89,7 @@ async function exportImage(options: ExportOptions) {
 } */
 
 .bottomContainer {
-  height: 40%;
+  /* height: 40%; */
   width: 100%;
   overflow: scroll;
 }

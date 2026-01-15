@@ -4,7 +4,7 @@
       <VCol :cols="12" class="text-center"> Image Input </VCol>
 
       <!-- File Input -->
-      <VCol :cols="columns" :sm="sm">
+      <VCol :cols="columns" :sm="sm" class="pa-1">
         <VFileInput
           v-model="file"
           accept="image/*"
@@ -17,7 +17,7 @@
       </VCol>
 
       <!-- Desqueeze Ratio -->
-      <VCol :cols="columns" :sm="sm">
+      <VCol :cols="columns" :sm="sm" class="pa-1">
         <SliderNumber
           v-model="desqueezeRatio"
           label="Desqueeze Ratio"
@@ -28,7 +28,7 @@
       </VCol>
 
       <!-- Lens Distortion -->
-      <VCol :cols="columns" :sm="sm">
+      <VCol :cols="columns" :sm="sm" class="pa-1">
         <SliderNumber
           v-model="lensDistortion"
           label="Lens Distortion"
@@ -39,7 +39,7 @@
       </VCol>
 
       <!-- Zoom -->
-      <VCol :cols="columns" :sm="sm">
+      <VCol :cols="columns" :sm="sm" class="pa-1">
         <SliderNumber
           v-model="zoom"
           label="Zoom"
@@ -50,7 +50,7 @@
       </VCol>
 
       <!-- Color Picker -->
-      <VCol :cols="columns" :sm="sm">
+      <VCol :cols="columns" :sm="sm" class="pa-1">
         <VRow>
           <VCol class="d-flex align-center"> Background Color </VCol>
           <VCol>
@@ -60,7 +60,7 @@
       </VCol>
 
       <!-- Export Image Button -->
-      <VCol :cols="columns" :sm="sm" class="buttonContainer">
+      <VCol :cols="columns" :sm="sm" class="buttonContainer pb-8">
         <VBtn
           @click="openExportDialog"
           :disabled="exportButtonDisabled"
