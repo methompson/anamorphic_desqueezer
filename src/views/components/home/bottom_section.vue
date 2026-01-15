@@ -116,12 +116,6 @@ const emit = defineEmits<{
 
 const file: Ref<File | undefined> = ref();
 
-watch(file, () => {
-  console.log({
-    file: file.value,
-  });
-});
-
 const model: ModelRef<DesqueezeOptions | undefined> = defineModel();
 
 const desqueezeRatio: Ref<number> = ref(1);

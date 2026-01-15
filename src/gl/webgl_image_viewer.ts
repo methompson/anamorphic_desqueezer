@@ -171,10 +171,6 @@ export class WebGLImageViewer {
         this._image = img;
         this.uploadTexture(img);
 
-        console.log('image loaded', {
-          backgroundColor: this.backgroundColor,
-        });
-
         this.render();
       };
       img.src = e.target?.result as string;
@@ -215,7 +211,6 @@ export class WebGLImageViewer {
   }
 
   setBackgroundColor(color: string) {
-    console.log('Setting background color to', color);
     // Parse hex color to RGB
     const hex = color.replace('#', '');
     this.backgroundColor = {

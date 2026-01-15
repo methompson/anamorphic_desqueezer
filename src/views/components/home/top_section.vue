@@ -12,7 +12,6 @@ const emit = defineEmits<{
 }>();
 
 watch(glCanvas, (newCanvas) => {
-  console.log('Canvas loaded:', newCanvas);
   if (newCanvas) {
     emit('canvasLoaded', newCanvas);
   }
