@@ -71,7 +71,7 @@ export class WebGLImageViewer {
 
     this.initWebGL();
     this.resizeCanvas();
-    this.setBackgroundColor('#ffff00');
+    this.setBackgroundColor('#0923FF');
     window.addEventListener('resize', () => this.resizeCanvas());
   }
 

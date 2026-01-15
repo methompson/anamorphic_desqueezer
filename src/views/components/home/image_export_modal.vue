@@ -95,7 +95,6 @@ const formatOptions = [
 const resolutionMode = ref<'original' | 'longestSide'>('longestSide');
 
 const longestSideChosen = computed(() => {
-  console.log({ mode: resolutionMode.value });
   return resolutionMode.value === 'longestSide';
 });
 
@@ -141,8 +140,6 @@ const outputOptions = computed(() => {
 
 // Watching format change to update compression settings
 watch(format, (newValue, oldValue) => {
-  console.log({ newValue, oldValue });
-
   if (newValue === 'jpeg') {
     if (compression.value < 1 || compression.value > 100) {
       compression.value = 75; // default for JPEG
@@ -152,7 +149,6 @@ watch(format, (newValue, oldValue) => {
     }
   } else if (format.value === 'png') {
     if (oldValue === 'jpeg') {
-      console.log('Converting compression from JPEG to PNG');
       // Convert JPEG compression (1-100) to PNG compression (1-9)
       compression.value = Math.round(((compression.value - 1) / 99) * 8 + 1);
     } else if (compression.value < 1 || compression.value > 9) {

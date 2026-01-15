@@ -1,5 +1,6 @@
 import {
   isEnumValueGenerator,
+  isInstanceOfGenerator,
   isNumber,
   isUndefinedOrNull,
   typeGuardGenerator,
@@ -28,3 +29,14 @@ export const isExportOptions = typeGuardGenerator<ExportOptions>({
   longestSidePx: isNumberOrNull,
   compression: isNumber,
 });
+
+export interface ImageCompressionWorkerMessage {
+  imageData: Uint8Array;
+  options: ExportOptions;
+}
+
+export const isImageCompressionWorkerMessage =
+  typeGuardGenerator<ImageCompressionWorkerMessage>({
+    imageData: isInstanceOfGenerator(Uint8Array),
+    options: isExportOptions,
+  });

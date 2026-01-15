@@ -1,4 +1,9 @@
-export function sendToWorker(file: File): Promise<Uint8Array> {
+import type { ExportOptions } from '@/models/export_options';
+
+export async function sendToWorker(
+  imageData: Uint8Array,
+  options: ExportOptions,
+): Promise<Uint8Array> {
   return new Promise((res, rej) => {
     const worker = new Worker(
       new URL('./image_compression_worker.ts', import.meta.url),
@@ -18,9 +23,14 @@ export function sendToWorker(file: File): Promise<Uint8Array> {
         rej(new Error('Received non-Uint8Array data'));
       }
 
+      res(new Uint8Array());
+
       worker.terminate();
     };
 
-    worker.postMessage(file);
+    worker.postMessage({
+      imageData,
+      options,
+    });
   });
 }

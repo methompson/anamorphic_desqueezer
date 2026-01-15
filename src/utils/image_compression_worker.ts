@@ -1,43 +1,64 @@
-import { isExportOptions, type ExportOptions } from '@/models/export_options';
-import { isInstanceOfGenerator, typeGuardGenerator } from '@metools/tcheck';
 import {
+  isImageCompressionWorkerMessage,
+  type ImageCompressionWorkerMessage,
+  ImageFormat,
+} from '@/models/export_options';
+import {
+  BmpCompressionOptions,
+  ImageCompressionOptions,
   ImageConverter,
   ImageResizeLongestSideOptions,
   JpegCompressionOptions,
+  PngCompressionOptions,
+  TgaCompressionOptions,
+  type ImageConverterInput,
 } from '@metools/web-image-converter';
 
-const isFile = isInstanceOfGenerator(File);
-
-interface ImageCompressionWorkerMessage {
-  file: File;
-  options: ExportOptions;
-}
-
-const isImageCompressionWorkerMessage =
-  typeGuardGenerator<ImageCompressionWorkerMessage>({
-    file: isFile,
-    options: isExportOptions,
-  });
-
 onmessage = async (e: MessageEvent) => {
-  console.log('Worker received message:', e);
+  console.log('Worker received message:', { e, data: e.data });
 
-  if (e.data instanceof File) {
-    // console.log('Received File');
-    // const result = await convertImage(e.data);
-    // postMessage(result);
+  if (isImageCompressionWorkerMessage(e.data)) {
+    console.log('Received Data');
+    const result = await convertImage(e.data);
+    postMessage(result);
   } else {
     postMessage('Received non-File data');
   }
 };
 
-async function convertImage(file: File) {
-  const converter = new ImageConverter({
-    compression: new JpegCompressionOptions(65),
-    resize: new ImageResizeLongestSideOptions({ longest_side: 1024 }),
-  });
+async function convertImage(data: ImageCompressionWorkerMessage) {
+  const compression = getCompressionOptions(data);
 
-  const result = await converter.convertImageFile(file);
+  const opt: ImageConverterInput = {
+    compression,
+  };
+
+  if (data.options.longestSidePx !== null) {
+    opt.resize = new ImageResizeLongestSideOptions({
+      longest_side: data.options.longestSidePx,
+    });
+  }
+
+  const converter = new ImageConverter(opt);
+
+  const result = await converter.convertImageBytes(data.imageData);
 
   return result;
+}
+
+function getCompressionOptions(
+  data: ImageCompressionWorkerMessage,
+): ImageCompressionOptions {
+  switch (data.options.format) {
+    case ImageFormat.JPEG:
+      return new JpegCompressionOptions(data.options.compression);
+    case ImageFormat.PNG:
+      return new PngCompressionOptions(data.options.compression);
+    case ImageFormat.BMP:
+      return new BmpCompressionOptions();
+    case ImageFormat.TGA:
+      return new TgaCompressionOptions();
+    default:
+      throw new Error('Unsupported image format');
+  }
 }

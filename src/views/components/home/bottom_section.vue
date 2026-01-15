@@ -63,7 +63,7 @@
       <VCol :cols="columns" :sm="sm" class="buttonContainer">
         <VBtn
           @click="openExportDialog"
-          :disabled="savingImage"
+          :disabled="exportButtonDisabled"
           variant="outlined"
         >
           <template v-if="savingImage" v-slot:prepend>
@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 import {
+  computed,
   onBeforeMount,
   ref,
   toRefs,
@@ -122,7 +123,15 @@ const desqueezeRatio: Ref<number> = ref(1);
 const lensDistortion: Ref<number> = ref(0);
 const zoom: Ref<number> = ref(1);
 // Stick with yellow for now
-const color: Ref<string> = ref('#FFFF00');
+const color: Ref<string> = ref('#0923FF');
+
+const exportButtonDisabled = computed(() => {
+  if (savingImage.value || !file.value) {
+    return true;
+  }
+
+  return false;
+});
 
 watch([file, desqueezeRatio, lensDistortion, zoom, color], () => {
   model.value = {

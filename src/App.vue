@@ -1,21 +1,13 @@
-<script setup lang="ts">
-import { RouterView } from 'vue-router';
-</script>
-
 <template>
   <VApp class="appContainer">
     <VMain class="mainContainer">
       <RouterView />
+      <ThemeView />
     </VMain>
   </VApp>
 </template>
 
-<style scoped>
-.appContainer {
-  background-color: blue;
-}
-
-.mainContainer {
-  background-color: green;
-}
-</style>
+<script setup lang="ts">
+import { RouterView } from 'vue-router';
+import ThemeView from './views/components/theme_view.vue';
+</script>

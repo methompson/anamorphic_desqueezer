@@ -1,14 +1,16 @@
 <template>
-  <div class="homePageContainer">
-    <TopSection @canvasLoaded="canvasLoaded" />
-    <div class="bottomContainer">
-      <BottomSection
-        v-model="desqueezeConfig"
-        @exportImage="exportImage"
-        :savingImage="savingImage"
-      />
+  <VContainer class="pa-0">
+    <div class="homePageContainer">
+      <TopSection @canvasLoaded="canvasLoaded" />
+      <div class="bottomContainer">
+        <BottomSection
+          v-model="desqueezeConfig"
+          @exportImage="exportImage"
+          :savingImage="savingImage"
+        />
+      </div>
     </div>
-  </div>
+  </VContainer>
 </template>
 
 <script setup lang="ts">
@@ -68,7 +70,6 @@ async function exportImage(options: ExportOptions) {
 
 <style scoped>
 .homePageContainer {
-  background-color: blue;
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -84,7 +85,6 @@ async function exportImage(options: ExportOptions) {
 } */
 
 .bottomContainer {
-  background-color: orange;
   height: 40%;
   width: 100%;
   overflow: scroll;
