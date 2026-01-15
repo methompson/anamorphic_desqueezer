@@ -68,7 +68,7 @@ async function exportImage(options: ExportOptions) {
 
 <style scoped>
 .homePageContainer {
-  background-color: red;
+  background-color: blue;
   height: 100vh;
   width: 100vw;
   display: flex;

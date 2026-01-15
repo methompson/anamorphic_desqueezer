@@ -170,6 +170,11 @@ export class WebGLImageViewer {
       img.onload = () => {
         this._image = img;
         this.uploadTexture(img);
+
+        console.log('image loaded', {
+          backgroundColor: this.backgroundColor,
+        });
+
         this.render();
       };
       img.src = e.target?.result as string;

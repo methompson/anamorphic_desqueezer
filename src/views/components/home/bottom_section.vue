@@ -128,7 +128,7 @@ const desqueezeRatio: Ref<number> = ref(1);
 const lensDistortion: Ref<number> = ref(0);
 const zoom: Ref<number> = ref(1);
 // Stick with yellow for now
-const color: Ref<string> = ref('#FF0');
+const color: Ref<string> = ref('#FFFF00');
 
 watch([file, desqueezeRatio, lensDistortion, zoom, color], () => {
   model.value = {
