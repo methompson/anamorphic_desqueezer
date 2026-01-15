@@ -13,13 +13,10 @@ export async function sendToWorker(
     );
 
     worker.onmessage = (e) => {
-      console.log('Main thread received message:', e.data);
-
       if (e.data instanceof Uint8Array) {
-        console.log('Received Uint8Array');
         res(e.data);
       } else {
-        console.log('Received non-Uint8Array data');
+        console.error('Received non-Uint8Array data');
         rej(new Error('Received non-Uint8Array data'));
       }
 

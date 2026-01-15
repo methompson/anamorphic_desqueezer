@@ -15,10 +15,7 @@ import {
 } from '@metools/web-image-converter';
 
 onmessage = async (e: MessageEvent) => {
-  console.log('Worker received message:', { e, data: e.data });
-
   if (isImageCompressionWorkerMessage(e.data)) {
-    console.log('Received Data');
     const result = await convertImage(e.data);
     postMessage(result);
   } else {

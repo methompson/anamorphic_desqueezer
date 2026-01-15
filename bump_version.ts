@@ -109,7 +109,6 @@ async function writeDataToFile(
   version: Version,
 ) {
   packageObject.version = `${version.major}.${version.minor}.${version.patch}`;
-  // console.log(JSON.stringify(packageObject, null, 2));
 
   await writeFile(
     './package.json',

@@ -8,7 +8,6 @@ export async function convertAndExportImage(
   bmpImageData: Blob,
   options: ExportOptions,
 ) {
-  console.log('Converting and exporting image with options:', options);
   const imgArr = await bmpImageData.arrayBuffer();
 
   const data = (await sendToWorker(

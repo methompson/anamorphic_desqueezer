@@ -30,7 +30,7 @@ const savingImage = ref(false);
 
 watch(desqueezeConfig, (newOpt, oldOpt) => {
   if (!viewer.value) {
-    console.log('No viewer available yet.');
+    console.error('No viewer available yet.');
     return;
   }
 
@@ -52,7 +52,7 @@ function canvasLoaded(canvas: HTMLCanvasElement) {
 
 async function exportImage(options: ExportOptions) {
   if (!viewer.value || !viewer.value.image) {
-    console.log('No viewer available yet.');
+    console.error('No viewer available yet.');
     return;
   }
 
