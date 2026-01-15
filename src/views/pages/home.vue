@@ -1,16 +1,14 @@
 <template>
-  <VContainer class="pa-0">
-    <div class="homePageContainer">
-      <TopSection @canvasLoaded="canvasLoaded" />
-      <div class="bottomContainer">
-        <BottomSection
-          v-model="desqueezeConfig"
-          @exportImage="exportImage"
-          :savingImage="savingImage"
-        />
-      </div>
+  <div class="homePageContainer">
+    <TopSection @canvasLoaded="canvasLoaded" />
+    <div class="bottomContainer">
+      <BottomSection
+        v-model="desqueezeConfig"
+        @exportImage="exportImage"
+        :savingImage="savingImage"
+      />
     </div>
-  </VContainer>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -76,6 +74,12 @@ async function exportImage(options: ExportOptions) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+@media (min-width: 1200px) {
+  .homePageContainer {
+    width: auto;
+  }
 }
 
 /* .topContainer {
