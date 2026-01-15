@@ -61,6 +61,8 @@
 
       <!-- Export Image Button -->
       <VCol :cols="columns" :sm="sm" class="buttonContainer pb-8">
+        <VBtn variant="outlined" @click="resetOptions"> Reset </VBtn>
+
         <VBtn
           @click="openExportDialog"
           :disabled="exportButtonDisabled"
@@ -142,6 +144,12 @@ watch([file, desqueezeRatio, lensDistortion, zoom, color], () => {
     backgroundColor: color.value,
   };
 });
+
+function resetOptions() {
+  desqueezeRatio.value = 1;
+  lensDistortion.value = 0;
+  zoom.value = 1;
+}
 
 const exportDialog = ref(false);
 function openExportDialog() {
