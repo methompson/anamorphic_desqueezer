@@ -1,6 +1,6 @@
 {
   "name": "anamorphic_desqueeze",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -37,6 +37,8 @@
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
     "eslint": "^9.39.2",
     "eslint-plugin-vue": "~10.6.2",
     "jiti": "^2.6.1",
@@ -44,6 +46,7 @@
     "npm-run-all2": "^8.0.4",
     "prettier": "3.7.4",
     "sass-embedded": "^1.97.2",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vite": "^7.3.0",
     "vite-plugin-vue-devtools": "^8.0.5",

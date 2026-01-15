@@ -59,8 +59,8 @@
         </VRow>
       </VCol>
 
-      <!-- Export Image Button -->
-      <VCol :cols="columns" :sm="sm" class="buttonContainer pb-8">
+      <!-- Export Image & Reset Buttons -->
+      <VCol :cols="columns" :sm="sm" class="buttonContainer">
         <VBtn variant="outlined" @click="resetOptions"> Reset </VBtn>
 
         <VBtn
@@ -77,6 +77,10 @@
         <VDialog v-model="exportDialog" v-if="exportDialog" max-width="500px">
           <ImageExportModal @cancel="closeExportDialog" @export="exportImage" />
         </VDialog>
+      </VCol>
+
+      <VCol :cols="columns" class="pa-1 pb-8 text-center">
+        Version: {{ version }}
       </VCol>
     </VRow>
   </VContainer>
@@ -98,6 +102,8 @@ import type { DesqueezeOptions } from '@/models/desqueeze_options';
 import SliderNumber from '@/views/components/slider_number.vue';
 import ImageExportModal from '@/views/components/home/image_export_modal.vue';
 import type { ExportOptions } from '@/models/export_options';
+
+const version = __APP_VERSION__;
 
 const columns = 12;
 const sm = 6;
@@ -184,6 +190,6 @@ onBeforeMount(beforeMountHandler);
 .buttonContainer {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
 }
 </style>
