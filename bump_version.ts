@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 import { isRecord, isString } from '@metools/tcheck';
 import { Command } from 'commander';
@@ -51,7 +51,7 @@ async function bumpPatchVersion(): Promise<void> {
 
   version.patch += 1;
 
-  await writeFile(packageObject, version);
+  await writeDataToFile(packageObject, version);
 }
 
 async function bumpMinorVersion(): Promise<void> {
@@ -60,7 +60,7 @@ async function bumpMinorVersion(): Promise<void> {
   version.minor += 1;
   version.patch = 0;
 
-  await writeFile(packageObject, version);
+  await writeDataToFile(packageObject, version);
 }
 
 async function bumpMajorVersion(): Promise<void> {
@@ -70,7 +70,7 @@ async function bumpMajorVersion(): Promise<void> {
   version.minor = 0;
   version.patch = 0;
 
-  await writeFile(packageObject, version);
+  await writeDataToFile(packageObject, version);
 }
 
 async function getNeededData(): Promise<{
@@ -104,12 +104,17 @@ async function readPackageFile() {
   return packageJson;
 }
 
-async function writeFile(
+async function writeDataToFile(
   packageObject: Record<string, unknown>,
   version: Version,
 ) {
   packageObject.version = `${version.major}.${version.minor}.${version.patch}`;
-  console.log(JSON.stringify(packageObject, null, 2));
+  // console.log(JSON.stringify(packageObject, null, 2));
+
+  await writeFile(
+    './package.json',
+    JSON.stringify(packageObject, null, 2) + '\n',
+  );
 }
 
 function splitVersion(version: string): Version {
