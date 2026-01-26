@@ -143,13 +143,19 @@ const color: Ref<string> = ref('#0923FF');
 
 // Keep desqueeze ratio to 2 decimal places
 watch(desqueezeRatio, (newVal) => {
-  desqueezeRatio.value = Number.parseFloat(newVal.toFixed(2));
+  if (newVal) {
+    desqueezeRatio.value = Number.parseFloat(newVal.toFixed(2));
+  }
 });
 watch(lensDistortion, (newVal) => {
-  lensDistortion.value = Number.parseFloat(newVal.toFixed(2));
+  if (newVal) {
+    lensDistortion.value = Number.parseFloat(newVal.toFixed(2));
+  }
 });
 watch(zoom, (newVal) => {
-  zoom.value = Number.parseFloat(newVal.toFixed(2));
+  if (newVal) {
+    zoom.value = Number.parseFloat(newVal.toFixed(2));
+  }
 });
 
 const exportButtonDisabled = computed(() => {
