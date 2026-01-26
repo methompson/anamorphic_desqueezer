@@ -40,3 +40,8 @@ export const isImageCompressionWorkerMessage =
     imageData: isInstanceOfGenerator(Uint8Array),
     options: isExportOptions,
   });
+
+export interface ImageDimensions {
+  width: number;
+  height: number;
+}

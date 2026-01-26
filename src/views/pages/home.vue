@@ -6,6 +6,7 @@
         v-model="desqueezeConfig"
         @exportImage="exportImage"
         :savingImage="savingImage"
+        :imageDimensions="imageDimensions"
       />
     </div>
   </div>
@@ -13,17 +14,17 @@
 
 <script setup lang="ts">
 import { onBeforeMount, ref, watch, type Ref } from 'vue';
+import debounce from 'lodash.debounce';
 
 import { WebGLImageViewer } from '@/gl/webgl_image_viewer';
 
 import type { DesqueezeOptions } from '@/models/desqueeze_options';
 import type { ExportOptions } from '@/models/export_options';
 import { convertAndExportImage } from '@/utils/image_conversion';
+import { useConfigStore } from '@/stores/config';
 
 import ImagePreview from '@/views/components/home/image_preview.vue';
 import DesqueezeConfig from '@/views/components/home/desqueeze_config.vue';
-import { useConfigStore } from '@/stores/config';
-import debounce from 'lodash.debounce';
 
 const configStore = useConfigStore();
 
@@ -33,6 +34,12 @@ const desqueezeConfig: Ref<DesqueezeOptions | undefined> = ref();
 
 const savingImage = ref(false);
 
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+const imageDimensions: Ref<ImageDimensions | undefined> = ref(undefined);
+
 const saveImageConfig = debounce(saveConfig, 500);
 
 function onBeforeMountHandler() {
@@ -40,9 +47,15 @@ function onBeforeMountHandler() {
 }
 onBeforeMount(onBeforeMountHandler);
 
-watch(desqueezeConfig, (newOpt, oldOpt) => {
+watch(desqueezeConfig, async (newOpt, oldOpt) => {
+  if (!newOpt?.file) {
+    // TODO unload WebGL viewer image
+    console.log('No file provided.');
+  }
+
   if (!viewer.value) {
     console.error('No viewer available yet.');
+    imageDimensions.value = undefined;
     return;
   }
 
@@ -53,7 +66,8 @@ watch(desqueezeConfig, (newOpt, oldOpt) => {
     viewer.value.setBackgroundColor(newOpt.backgroundColor);
 
     if (newOpt.file && newOpt.file !== oldOpt?.file) {
-      viewer.value.loadImage(newOpt.file);
+      const dimensions = await viewer.value.loadImage(newOpt.file);
+      imageDimensions.value = dimensions;
     }
   }
 
@@ -66,8 +80,6 @@ function saveConfig() {
   } else {
     configStore.clearDesqueezeOptions();
   }
-
-  console.log('saved');
 }
 
 function canvasLoaded(canvas: HTMLCanvasElement) {

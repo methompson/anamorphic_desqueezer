@@ -1,3 +1,4 @@
+import type { ImageDimensions } from '@/models/export_options';
 import { isNumber } from '@metools/tcheck';
 
 // Vertex shader: positions the image quad
@@ -77,6 +78,14 @@ export class WebGLImageViewer {
 
   get image() {
     return this._image;
+  }
+
+  get dimensions(): ImageDimensions {
+    if (!this._image) {
+      return { width: -1, height: -1 };
+    }
+
+    return { width: this._image.width, height: this._image.height };
   }
 
   private initWebGL() {
@@ -163,19 +172,29 @@ export class WebGLImageViewer {
     }
   }
 
-  loadImage(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        this._image = img;
-        this.uploadTexture(img);
+  async loadImage(file: File): Promise<ImageDimensions> {
+    return new Promise((res, rej) => {
+      const reader = new FileReader();
 
-        this.render();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          this._image = img;
+          this.uploadTexture(img);
+
+          this.render();
+          res(this.dimensions);
+        };
+
+        img.onerror = (err) => {
+          rej(new Error(`Failed to load image: ${err}`));
+        };
+
+        img.src = e.target?.result as string;
       };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+
+      reader.readAsDataURL(file);
+    });
   }
 
   private uploadTexture(image: HTMLImageElement) {

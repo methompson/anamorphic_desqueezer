@@ -76,8 +76,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch, onBeforeMount } from 'vue';
+
 import { ImageFormat, type ExportOptions } from '@/models/export_options';
-import { ref, computed, watch } from 'vue';
+import { useConfigStore } from '@/stores/config';
+import debounce from 'lodash.debounce';
+
+const configStore = useConfigStore();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
@@ -99,8 +104,25 @@ const longestSideChosen = computed(() => {
 });
 
 const format = ref<ImageFormat>(ImageFormat.JPEG);
-const longestSidePx = ref<number | null>(1920);
+const longestSidePx = ref<number>(1920);
 const compression = ref<number>(75);
+
+function onBeforeMountHandler() {
+  const savedOptions = configStore.imageExportConfigOptions;
+  if (savedOptions) {
+    format.value = savedOptions.format;
+    compression.value = savedOptions.compression;
+
+    if (savedOptions.longestSidePx) {
+      resolutionMode.value = 'longestSide';
+      longestSidePx.value = savedOptions.longestSidePx;
+    } else {
+      resolutionMode.value = 'original';
+      longestSidePx.value = 1920;
+    }
+  }
+}
+onBeforeMount(onBeforeMountHandler);
 
 // Computed properties for compression settings
 const showCompression = computed(() => {
@@ -131,12 +153,17 @@ const outputOptions = computed(() => {
     compression: compression.value,
   };
 
-  if (['jpeg', 'png'].includes(format.value) && longestSideChosen.value) {
+  if (longestSideChosen.value) {
     options.longestSidePx = longestSidePx.value;
   }
 
   return options;
 });
+
+const saveExportConfig = debounce(saveExportConfigFn, 500);
+function saveExportConfigFn() {
+  configStore.updateImageExportOptiosn(outputOptions.value);
+}
 
 // Watching format change to update compression settings
 watch(format, (newValue, oldValue) => {
@@ -155,6 +182,10 @@ watch(format, (newValue, oldValue) => {
       compression.value = 6; // default for PNG
     }
   }
+});
+
+watch([format, longestSidePx, compression, longestSideChosen], () => {
+  saveExportConfig();
 });
 
 const handleExport = () => {

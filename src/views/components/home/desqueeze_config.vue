@@ -14,6 +14,14 @@
           density="compact"
           hide-details
         />
+
+        <div
+          v-if="imageDimensions && file"
+          class="text-caption text-center text-grey"
+        >
+          Original Image Dimensions:
+          {{ imageDimensions.width }} x {{ imageDimensions.height }}
+        </div>
       </VCol>
 
       <!-- Desqueeze Ratio -->
@@ -111,13 +119,14 @@ const sm = 6;
 const props = withDefaults(
   defineProps<{
     savingImage?: boolean;
+    imageDimensions?: { width: number; height: number };
   }>(),
   {
     savingImage: false,
   },
 );
 
-const { savingImage } = toRefs(props);
+const { savingImage, imageDimensions } = toRefs(props);
 
 const emit = defineEmits<{
   (e: 'exportImage', options: ExportOptions): void;
@@ -131,6 +140,17 @@ const desqueezeRatio: Ref<number> = ref(1);
 const lensDistortion: Ref<number> = ref(0);
 const zoom: Ref<number> = ref(1);
 const color: Ref<string> = ref('#0923FF');
+
+// Keep desqueeze ratio to 2 decimal places
+watch(desqueezeRatio, (newVal) => {
+  desqueezeRatio.value = Number.parseFloat(newVal.toFixed(2));
+});
+watch(lensDistortion, (newVal) => {
+  lensDistortion.value = Number.parseFloat(newVal.toFixed(2));
+});
+watch(zoom, (newVal) => {
+  zoom.value = Number.parseFloat(newVal.toFixed(2));
+});
 
 const exportButtonDisabled = computed(() => {
   if (savingImage.value || !file.value) {
