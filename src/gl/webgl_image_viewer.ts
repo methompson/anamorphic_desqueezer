@@ -172,6 +172,23 @@ export class WebGLImageViewer {
     }
   }
 
+  private uploadTexture(image: HTMLImageElement) {
+    const gl = this.gl;
+
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+    // Don't flip - display image as-is
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+    // Set texture parameters
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  }
+
   async loadImage(file: File): Promise<ImageDimensions> {
     return new Promise((res, rej) => {
       const reader = new FileReader();
@@ -197,21 +214,18 @@ export class WebGLImageViewer {
     });
   }
 
-  private uploadTexture(image: HTMLImageElement) {
-    const gl = this.gl;
-
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
-
-    // Don't flip - display image as-is
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-    // Set texture parameters
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  /**
+   * Unloads the current image from the viewer. Should clear the texture and reset state.
+   */
+  unloadImage() {
+    this._image = null;
+    this.gl.clearColor(
+      this.backgroundColor.r,
+      this.backgroundColor.g,
+      this.backgroundColor.b,
+      1,
+    );
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
   }
 
   setDesqueeze(value: number) {

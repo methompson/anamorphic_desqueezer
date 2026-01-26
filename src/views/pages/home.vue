@@ -48,11 +48,6 @@ function onBeforeMountHandler() {
 onBeforeMount(onBeforeMountHandler);
 
 watch(desqueezeConfig, async (newOpt, oldOpt) => {
-  if (!newOpt?.file) {
-    // TODO unload WebGL viewer image
-    console.log('No file provided.');
-  }
-
   if (!viewer.value) {
     console.error('No viewer available yet.');
     imageDimensions.value = undefined;
@@ -68,6 +63,9 @@ watch(desqueezeConfig, async (newOpt, oldOpt) => {
     if (newOpt.file && newOpt.file !== oldOpt?.file) {
       const dimensions = await viewer.value.loadImage(newOpt.file);
       imageDimensions.value = dimensions;
+    } else if (!newOpt.file) {
+      viewer.value.unloadImage();
+      imageDimensions.value = undefined;
     }
   }
 
