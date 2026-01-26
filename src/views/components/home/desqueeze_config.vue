@@ -130,7 +130,6 @@ const model: ModelRef<DesqueezeOptions | undefined> = defineModel();
 const desqueezeRatio: Ref<number> = ref(1);
 const lensDistortion: Ref<number> = ref(0);
 const zoom: Ref<number> = ref(1);
-// Stick with yellow for now
 const color: Ref<string> = ref('#0923FF');
 
 const exportButtonDisabled = computed(() => {

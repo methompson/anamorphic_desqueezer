@@ -1,8 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import { exec } from 'node:child_process';
 
 import { isRecord, isString } from '@metools/tcheck';
 import { Command } from 'commander';
 import chalk from 'chalk';
+import semver from 'semver';
 
 main().catch((error) => {
   console.error(chalk.red('Error executing version bump:'), error);
@@ -40,43 +42,60 @@ async function main() {
   program.parse();
 }
 
-interface Version {
-  major: number;
-  minor: number;
-  patch: number;
+function successMessage(newVersion: string) {
+  console.log(
+    chalk.bgGreen(`Successfully bumped version to ${chalk.bold(newVersion)}`),
+  );
 }
 
 async function bumpPatchVersion(): Promise<void> {
   const { version, packageObject } = await getNeededData();
 
-  version.patch += 1;
+  const newVersion = semver.inc(version, 'patch');
 
-  await writeDataToFile(packageObject, version);
+  if (!newVersion) {
+    throw new Error('Failed to increment patch version');
+  }
+
+  await writeDataToFile(packageObject, newVersion.toString());
+
+  successMessage(newVersion);
 }
 
 async function bumpMinorVersion(): Promise<void> {
   const { version, packageObject } = await getNeededData();
 
-  version.minor += 1;
-  version.patch = 0;
+  const newVersion = semver.inc(version, 'minor');
 
-  await writeDataToFile(packageObject, version);
+  if (!newVersion) {
+    throw new Error('Failed to increment minor version');
+  }
+
+  await writeDataToFile(packageObject, newVersion.toString());
+
+  successMessage(newVersion);
 }
 
 async function bumpMajorVersion(): Promise<void> {
   const { version, packageObject } = await getNeededData();
 
-  version.major += 1;
-  version.minor = 0;
-  version.patch = 0;
+  const newVersion = semver.inc(version, 'major');
 
-  await writeDataToFile(packageObject, version);
+  if (!newVersion) {
+    throw new Error('Failed to increment major version');
+  }
+
+  await writeDataToFile(packageObject, newVersion.toString());
+
+  successMessage(newVersion);
 }
 
-async function getNeededData(): Promise<{
-  version: Version;
+interface GetNeededDataOutput {
+  version: string;
   packageObject: Record<string, unknown>;
-}> {
+}
+
+async function getNeededData(): Promise<GetNeededDataOutput> {
   const file = await readPackageFile();
   const currentVersion = file.version;
 
@@ -84,10 +103,10 @@ async function getNeededData(): Promise<{
     throw new Error('Version is not a string in package.json');
   }
 
-  const version = splitVersion(currentVersion);
+  // const version = splitVersion(currentVersion);
 
   return {
-    version,
+    version: currentVersion,
     packageObject: file,
   };
 }
@@ -106,25 +125,28 @@ async function readPackageFile() {
 
 async function writeDataToFile(
   packageObject: Record<string, unknown>,
-  version: Version,
+  version: string,
 ) {
-  packageObject.version = `${version.major}.${version.minor}.${version.patch}`;
+  packageObject.version = version;
 
   await writeFile(
     './package.json',
     JSON.stringify(packageObject, null, 2) + '\n',
   );
+
+  await regenPackageLock();
 }
 
-function splitVersion(version: string): Version {
-  const versionParts = version.split('.').map(Number);
-  if (versionParts.length !== 3) {
-    throw new Error('Version format is incorrect. Expected format: x.y.z');
-  }
+async function regenPackageLock() {
+  return new Promise<void>((resolve, reject) => {
+    exec('npm install', (error) => {
+      if (error) {
+        console.error(`Error regenerating package-lock.json: ${error.message}`);
+        reject(error);
+        return;
+      }
 
-  return {
-    major: versionParts[0],
-    minor: versionParts[1],
-    patch: versionParts[2],
-  };
+      resolve();
+    });
+  });
 }

@@ -1,8 +1,8 @@
 <template>
   <div class="homePageContainer">
-    <TopSection @canvasLoaded="canvasLoaded" />
+    <ImagePreview @canvasLoaded="canvasLoaded" />
     <div class="bottomContainer">
-      <BottomSection
+      <DesqueezeConfig
         v-model="desqueezeConfig"
         @exportImage="exportImage"
         :savingImage="savingImage"
@@ -12,21 +12,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, type Ref } from 'vue';
+import { onBeforeMount, ref, watch, type Ref } from 'vue';
 
 import { WebGLImageViewer } from '@/gl/webgl_image_viewer';
 
-import TopSection from '@/views/components/home/top_section.vue';
-import BottomSection from '@/views/components/home/bottom_section.vue';
 import type { DesqueezeOptions } from '@/models/desqueeze_options';
 import type { ExportOptions } from '@/models/export_options';
 import { convertAndExportImage } from '@/utils/image_conversion';
+
+import ImagePreview from '@/views/components/home/image_preview.vue';
+import DesqueezeConfig from '@/views/components/home/desqueeze_config.vue';
+import { useConfigStore } from '@/stores/config';
+import debounce from 'lodash.debounce';
+
+const configStore = useConfigStore();
 
 const viewer = ref<WebGLImageViewer | null>(null);
 
 const desqueezeConfig: Ref<DesqueezeOptions | undefined> = ref();
 
 const savingImage = ref(false);
+
+const saveImageConfig = debounce(saveConfig, 500);
+
+function onBeforeMountHandler() {
+  desqueezeConfig.value = configStore.currentDesqueezeOptions;
+}
+onBeforeMount(onBeforeMountHandler);
 
 watch(desqueezeConfig, (newOpt, oldOpt) => {
   if (!viewer.value) {
@@ -44,7 +56,19 @@ watch(desqueezeConfig, (newOpt, oldOpt) => {
       viewer.value.loadImage(newOpt.file);
     }
   }
+
+  saveImageConfig();
 });
+
+function saveConfig() {
+  if (desqueezeConfig.value) {
+    configStore.updateDesqueezeOptions(desqueezeConfig.value);
+  } else {
+    configStore.clearDesqueezeOptions();
+  }
+
+  console.log('saved');
+}
 
 function canvasLoaded(canvas: HTMLCanvasElement) {
   viewer.value = new WebGLImageViewer(canvas);
