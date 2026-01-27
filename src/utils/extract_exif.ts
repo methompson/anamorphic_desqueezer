@@ -1,12 +1,18 @@
-import type { ExportOptions } from '@/models/export_options';
+export async function extractExifDataFromImage(
+  file: File,
+): Promise<Uint8Array | undefined> {
+  try {
+    const result = await sendToExifWorker(file);
+    return result;
+  } catch (e) {
+    console.error('Error extracting EXIF data: ', e);
+  }
+}
 
-export async function sendToWorker(
-  imageData: Uint8Array,
-  options: ExportOptions,
-): Promise<Uint8Array> {
+async function sendToExifWorker(file: File): Promise<Uint8Array> {
   return new Promise((res, rej) => {
     const worker = new Worker(
-      new URL('./image_compression_worker.ts', import.meta.url),
+      new URL('./worker_extract_exif.ts', import.meta.url),
       {
         type: 'module',
       },
@@ -16,7 +22,6 @@ export async function sendToWorker(
       if (e.data instanceof Uint8Array) {
         res(e.data);
       } else {
-        console.error('Received non-Uint8Array data');
         rej(new Error('Received non-Uint8Array data'));
       }
 
@@ -26,8 +31,7 @@ export async function sendToWorker(
     };
 
     worker.postMessage({
-      imageData,
-      options,
+      file,
     });
   });
 }

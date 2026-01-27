@@ -20,6 +20,7 @@ export interface ExportOptions {
   format: ImageFormat;
   longestSidePx: number | null;
   compression: number;
+  exif?: Uint8Array;
 }
 
 const isNumberOrNull = unionGuard<number | null>(isNumber, isUndefinedOrNull);
@@ -28,6 +29,10 @@ export const isExportOptions = typeGuardGenerator<ExportOptions>({
   format: isImageFormat,
   longestSidePx: isNumberOrNull,
   compression: isNumber,
+  exif: unionGuard<Uint8Array | undefined>(
+    isInstanceOfGenerator(Uint8Array),
+    isUndefinedOrNull,
+  ),
 });
 
 export interface ImageCompressionWorkerMessage {

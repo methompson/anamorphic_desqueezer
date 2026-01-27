@@ -18,10 +18,13 @@ import debounce from 'lodash.debounce';
 
 import { WebGLImageViewer } from '@/gl/webgl_image_viewer';
 
+import { useConfigStore } from '@/stores/config';
+
 import type { DesqueezeOptions } from '@/models/desqueeze_options';
 import type { ExportOptions } from '@/models/export_options';
+
 import { convertAndExportImage } from '@/utils/image_conversion';
-import { useConfigStore } from '@/stores/config';
+import { extractExifDataFromImage } from '@/utils/extract_exif';
 
 import ImagePreview from '@/views/components/home/image_preview.vue';
 import DesqueezeConfig from '@/views/components/home/desqueeze_config.vue';
@@ -42,6 +45,8 @@ const imageDimensions: Ref<ImageDimensions | undefined> = ref(undefined);
 
 const saveImageConfig = debounce(saveConfig, 500);
 
+const imageFile: Ref<File | undefined> = ref(undefined);
+
 function onBeforeMountHandler() {
   desqueezeConfig.value = configStore.currentDesqueezeOptions;
 }
@@ -61,9 +66,11 @@ watch(desqueezeConfig, async (newOpt, oldOpt) => {
     viewer.value.setBackgroundColor(newOpt.backgroundColor);
 
     if (newOpt.file && newOpt.file !== oldOpt?.file) {
+      imageFile.value = newOpt.file;
       const dimensions = await viewer.value.loadImage(newOpt.file);
       imageDimensions.value = dimensions;
     } else if (!newOpt.file) {
+      imageFile.value = undefined;
       viewer.value.unloadImage();
       imageDimensions.value = undefined;
     }
@@ -85,8 +92,9 @@ function canvasLoaded(canvas: HTMLCanvasElement) {
 }
 
 async function exportImage(options: ExportOptions) {
-  if (!viewer.value || !viewer.value.image) {
-    console.error('No viewer available yet.');
+  const imgFile = imageFile.value;
+  if (!viewer.value || !viewer.value.image || !imgFile) {
+    console.error('No viewer or file available yet.');
     return;
   }
 
@@ -94,7 +102,8 @@ async function exportImage(options: ExportOptions) {
 
   savingImage.value = true;
 
-  await convertAndExportImage(bmp, options);
+  const exifData = await extractExifDataFromImage(imgFile);
+  await convertAndExportImage(bmp, { ...options, exif: exifData });
 
   savingImage.value = false;
 }

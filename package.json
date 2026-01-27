@@ -19,7 +19,7 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@metools/tcheck": "^1.4.1",
-    "@metools/web-image-converter": "^1.0.8",
+    "@metools/web-image-converter": "^2.0.0-beta.3",
     "lodash.debounce": "^4.0.8",
     "pinia": "^3.0.4",
     "semver": "^7.7.3",

@@ -1,5 +1,4 @@
 import type { ExportOptions, ImageFormat } from '@/models/export_options';
-import { sendToWorker } from '@/utils/send_to_worker';
 
 /**
  * Takes the BMP data from WebGLImageViewer and exports it as an image file.
@@ -26,4 +25,36 @@ function downloadBlobAsFile(blob: Blob, format: ImageFormat) {
   a.download = `exported-image-${Date.now()}.${format}`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+async function sendToWorker(
+  imageData: Uint8Array,
+  options: ExportOptions,
+): Promise<Uint8Array> {
+  return new Promise((res, rej) => {
+    const worker = new Worker(
+      new URL('./worker_image_compression.ts', import.meta.url),
+      {
+        type: 'module',
+      },
+    );
+
+    worker.onmessage = (e) => {
+      if (e.data instanceof Uint8Array) {
+        res(e.data);
+      } else {
+        console.error('Received non-Uint8Array data');
+        rej(new Error('Received non-Uint8Array data'));
+      }
+
+      res(new Uint8Array());
+
+      worker.terminate();
+    };
+
+    worker.postMessage({
+      imageData,
+      options,
+    });
+  });
 }

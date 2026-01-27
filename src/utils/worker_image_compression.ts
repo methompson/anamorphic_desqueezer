@@ -11,15 +11,20 @@ import {
   JpegCompressionOptions,
   PngCompressionOptions,
   TgaCompressionOptions,
+  type ImageConversionInstanceOptions,
   type ImageConverterInput,
 } from '@metools/web-image-converter';
 
 onmessage = async (e: MessageEvent) => {
-  if (isImageCompressionWorkerMessage(e.data)) {
-    const result = await convertImage(e.data);
-    postMessage(result);
-  } else {
-    postMessage('Received non-File data');
+  try {
+    if (isImageCompressionWorkerMessage(e.data)) {
+      const result = await convertImage(e.data);
+      postMessage(result);
+    } else {
+      postMessage('Received non-File data');
+    }
+  } catch (err) {
+    postMessage(`Error in image compression worker: ${err}`);
   }
 };
 
@@ -32,13 +37,19 @@ async function convertImage(data: ImageCompressionWorkerMessage) {
 
   if (data.options.longestSidePx !== null) {
     opt.resize = new ImageResizeLongestSideOptions({
-      longest_side: data.options.longestSidePx,
+      longestSide: data.options.longestSidePx,
     });
   }
 
   const converter = new ImageConverter(opt);
 
-  const result = await converter.convertImageBytes(data.imageData);
+  const options: ImageConversionInstanceOptions = {};
+
+  if (data.options.exif) {
+    options.exifData = data.options.exif;
+  }
+
+  const result = await converter.convertImageBytes(data.imageData, options);
 
   return result;
 }
