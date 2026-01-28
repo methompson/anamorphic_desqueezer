@@ -105,11 +105,15 @@ import {
   type Ref,
 } from 'vue';
 
+import { v4 as uuidv4 } from 'uuid';
+
 import type { DesqueezeOptions } from '@/models/desqueeze_options';
+import type { ExportOptions } from '@/models/export_options';
+
+import { useAppStore } from '@/stores/app';
 
 import SliderNumber from '@/views/components/slider_number.vue';
 import ImageExportModal from '@/views/components/home/image_export_modal.vue';
-import type { ExportOptions } from '@/models/export_options';
 
 const version = __APP_VERSION__;
 
@@ -131,6 +135,8 @@ const { savingImage, imageDimensions } = toRefs(props);
 const emit = defineEmits<{
   (e: 'exportImage', options: ExportOptions): void;
 }>();
+
+const appStore = useAppStore();
 
 const file: Ref<File | undefined> = ref();
 
@@ -177,6 +183,7 @@ watch([file, desqueezeRatio, lensDistortion, zoom, color], () => {
 });
 
 function resetOptions() {
+  appStore.addErrorMessage(uuidv4());
   desqueezeRatio.value = 1;
   lensDistortion.value = 0;
   zoom.value = 1;

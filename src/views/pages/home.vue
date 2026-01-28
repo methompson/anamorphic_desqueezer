@@ -19,6 +19,7 @@ import debounce from 'lodash.debounce';
 import { WebGLImageViewer } from '@/gl/webgl_image_viewer';
 
 import { useConfigStore } from '@/stores/config';
+import { useAppStore } from '@/stores/app';
 
 import type { DesqueezeOptions } from '@/models/desqueeze_options';
 import type { ExportOptions } from '@/models/export_options';
@@ -30,6 +31,7 @@ import ImagePreview from '@/views/components/home/image_preview.vue';
 import DesqueezeConfig from '@/views/components/home/desqueeze_config.vue';
 
 const configStore = useConfigStore();
+const appStore = useAppStore();
 
 const viewer = ref<WebGLImageViewer | null>(null);
 
@@ -53,30 +55,36 @@ function onBeforeMountHandler() {
 onBeforeMount(onBeforeMountHandler);
 
 watch(desqueezeConfig, async (newOpt, oldOpt) => {
-  if (!viewer.value) {
-    console.error('No viewer available yet.');
-    imageDimensions.value = undefined;
+  try {
+    if (!viewer.value) {
+      console.error('No viewer available yet.');
+      imageDimensions.value = undefined;
+      return;
+    }
+
+    if (newOpt) {
+      viewer.value.setDesqueeze(newOpt.desqueezeRatio);
+      viewer.value.setDistortion(newOpt.lensDistortion);
+      viewer.value.setZoom(newOpt.zoom);
+      viewer.value.setBackgroundColor(newOpt.backgroundColor);
+
+      if (newOpt.file && newOpt.file !== oldOpt?.file) {
+        imageFile.value = newOpt.file;
+        const dimensions = await viewer.value.loadImage(newOpt.file);
+        imageDimensions.value = dimensions;
+      } else if (!newOpt.file) {
+        imageFile.value = undefined;
+        viewer.value.unloadImage();
+        imageDimensions.value = undefined;
+      }
+    }
+
+    saveImageConfig();
+  } catch (e) {
+    console.error('Error applying desqueeze options: ', e);
+    appStore.addErrorMessage(`Error applying desqueeze options: ${e}`);
     return;
   }
-
-  if (newOpt) {
-    viewer.value.setDesqueeze(newOpt.desqueezeRatio);
-    viewer.value.setDistortion(newOpt.lensDistortion);
-    viewer.value.setZoom(newOpt.zoom);
-    viewer.value.setBackgroundColor(newOpt.backgroundColor);
-
-    if (newOpt.file && newOpt.file !== oldOpt?.file) {
-      imageFile.value = newOpt.file;
-      const dimensions = await viewer.value.loadImage(newOpt.file);
-      imageDimensions.value = dimensions;
-    } else if (!newOpt.file) {
-      imageFile.value = undefined;
-      viewer.value.unloadImage();
-      imageDimensions.value = undefined;
-    }
-  }
-
-  saveImageConfig();
 });
 
 function saveConfig() {
@@ -92,20 +100,26 @@ function canvasLoaded(canvas: HTMLCanvasElement) {
 }
 
 async function exportImage(options: ExportOptions) {
-  const imgFile = imageFile.value;
-  if (!viewer.value || !viewer.value.image || !imgFile) {
-    console.error('No viewer or file available yet.');
+  try {
+    const imgFile = imageFile.value;
+    if (!viewer.value || !viewer.value.image || !imgFile) {
+      console.error('No viewer or file available yet.');
+      return;
+    }
+
+    const bmp = viewer.value.exportAsBMP();
+
+    savingImage.value = true;
+
+    const exifData = await extractExifDataFromImage(imgFile);
+    await convertAndExportImage(bmp, { ...options, exif: exifData });
+  } catch (e) {
+    console.error('Error exporting image: ', e);
+    appStore.addErrorMessage(`Error exporting image: ${e}`);
     return;
+  } finally {
+    savingImage.value = false;
   }
-
-  const bmp = viewer.value.exportAsBMP();
-
-  savingImage.value = true;
-
-  const exifData = await extractExifDataFromImage(imgFile);
-  await convertAndExportImage(bmp, { ...options, exif: exifData });
-
-  savingImage.value = false;
 }
 </script>
 

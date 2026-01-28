@@ -1,3 +1,5 @@
+import { useAppStore } from '@/stores/app';
+
 export async function extractExifDataFromImage(
   file: File,
 ): Promise<Uint8Array | undefined> {
@@ -6,6 +8,8 @@ export async function extractExifDataFromImage(
     return result;
   } catch (e) {
     console.error('Error extracting EXIF data: ', e);
+    useAppStore().addErrorMessage(`Error extracting EXIF data: ${e}`);
+    return undefined;
   }
 }
 
